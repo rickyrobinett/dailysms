@@ -11,7 +11,8 @@
     "body-parser": "1.8.x",
     "cron": "1.0.x",
     "twilio": "1.2.x",
-    "firebase": "1.0.x"
+    "firebase": "1.0.x",
+    "giphy-wrapper": "0.0.1"
   },
   "keywords": [
     "twilio",

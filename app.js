@@ -1,6 +1,8 @@
 var twilio = require('twilio'),
     client = twilio('ACCOUNTSID', 'AUTHTOKEN'),
     cronJob = require('cron').CronJob;
+
+var giphy = require('giphy-wrapper')('YOUR_API_KEY');
  
 var express = require('express'),
     bodyParser = require('body-parser'),
@@ -21,11 +23,20 @@ usersRef.on('child_added', function(snapshot) {
 });
  
 var textJob = new cronJob( '0 18 * * *', function(){
-  for( var i = 0; i < numbers.length; i++ ) {
-    client.sendMessage( { to:numbers[i], from:'YOURTWILIONUMBER', body:'Hello! Hope you’re having a good day.'}, function( err, data ) {
-      console.log( data.body );
-    });
-  }
+  giphy.search('puppy', 100, 0, function (err, data) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    var gifs = data.data;
+    var gif = gifs[Math.floor(Math.random()*gifs.length)];
+    for( var i = 0; i < numbers.length; i++ ) {
+      client.sendMessage( { to:numbers[i], from:'YOURTWILIONUMBER', body:'PUPPIES!', mediaUrl: gif.images.downsized.url}, function( err, data ) {
+        console.log( data.body );
+      });
+    }
+  });  
 },  null, true);
  
 app.post('/message', function (req, res) {
@@ -35,7 +46,10 @@ app.post('/message', function (req, res) {
     if(numbers.indexOf(fromNum) !== -1) {
       resp.message('You already subscribed!');
     } else {
-      resp.message('Thank you, you are now subscribed. Reply "STOP" to stop receiving updates.');
+      resp.message(function() {
+        this.body('Thank you, you are now subscribed. Reply "STOP" to stop receiving updates.')
+            .media('http://media.giphy.com/media/zl170rmVMCpEY/giphy.gif');
+      });
       usersRef.push(fromNum);
     }
   } else {
